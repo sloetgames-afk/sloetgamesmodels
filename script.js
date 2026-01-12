@@ -55,3 +55,121 @@ input[type="file"] { display: none; }
         transform: translateX(-50%); width: 90%;
     }
 }
+let scene, camera, renderer, controls, mixer;
+const clock = new THREE.Clock();
+
+function init() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1a1a);
+    
+    // Luces
+    const ambient = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+    scene.add(ambient);
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7);
+    scene.add(light);
+
+    // Cámara
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 5, 5);
+
+    // Renderer
+    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimizado móvil
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    document.body.appendChild(renderer.domElement);
+
+    // Controles
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Eventos
+    window.addEventListener('resize', onWindowResize);
+    document.getElementById('fileInput').addEventListener('change', handleFile);
+    document.getElementById('deleteBtn').addEventListener('click', clearScene);
+
+    animate();
+}
+
+function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    clearScene(); // Borrar anterior antes de cargar nuevo
+    
+    document.getElementById('loader').style.display = 'flex';
+    const url = URL.createObjectURL(file);
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    let loader;
+    if (ext === 'glb' || ext === 'gltf') loader = new THREE.GLTFLoader();
+    else if (ext === 'fbx') loader = new THREE.FBXLoader();
+    else if (ext === 'obj') loader = new THREE.OBJLoader();
+    else if (ext === 'stl') loader = new THREE.STLLoader();
+
+    if (loader) {
+        loader.load(url, (data) => {
+            let obj = data.scene || data;
+            if (ext === 'stl') {
+                const mat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+                obj = new THREE.Mesh(data, mat);
+            }
+            setupModel(obj, data.animations);
+        }, undefined, (err) => {
+            console.error(err);
+            document.getElementById('loader').style.display = 'none';
+        });
+    }
+}
+
+function setupModel(obj, animations) {
+    obj.name = "LoadedModel";
+    
+    // Centrar
+    const box = new THREE.Box3().setFromObject(obj);
+    const center = box.getCenter(new THREE.Vector3());
+    obj.position.sub(center);
+
+    scene.add(obj);
+
+    // Animaciones
+    if (animations && animations.length > 0) {
+        mixer = new THREE.AnimationMixer(obj);
+        mixer.clipAction(animations[0]).play();
+    }
+
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('status').innerText = "Modelo cargado.";
+}
+
+function clearScene() {
+    const model = scene.getObjectByName("LoadedModel");
+    if (model) {
+        model.traverse(n => {
+            if (n.geometry) n.geometry.dispose();
+            if (n.material) {
+                if (Array.isArray(n.material)) n.material.forEach(m => m.dispose());
+                else n.material.dispose();
+            }
+        });
+        scene.remove(model);
+        mixer = null;
+        document.getElementById('status').innerText = "Memoria limpia.";
+    }
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (mixer) mixer.update(clock.getDelta());
+    controls.update();
+    renderer.render(scene, camera);
+}
+
+init();
