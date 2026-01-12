@@ -1,57 +1,132 @@
 body { 
-    margin: 0; overflow: hidden; background-color: #121212; 
-    color: #fff; font-family: sans-serif; overscroll-behavior: none;
+    margin: 0; 
+    overflow: hidden; 
+    background-color: #121212; 
+    color: #fff; 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    /* Previene el rebote de scroll en móviles */
+    overscroll-behavior: none;
 }
 
+/* UI Overlay - Diseño Base (Desktop) */
 #ui-container {
-    position: absolute; top: 20px; left: 20px; z-index: 10;
-    background: rgba(20, 20, 20, 0.9); backdrop-filter: blur(10px);
-    padding: 20px; border-radius: 12px; border: 1px solid #333;
-    width: 220px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    position: absolute;
+    top: 20px; 
+    left: 20px; 
+    z-index: 10;
+    background: rgba(20, 20, 20, 0.85); 
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 12px; 
+    border: 1px solid #333;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    min-width: 220px;
+    transition: all 0.3s ease;
 }
 
-h1 { font-size: 16px; margin: 0 0 15px 0; color: #4facfe; text-transform: uppercase; }
+h1 { 
+    font-size: 18px; 
+    margin: 0 0 15px 0; 
+    color: #4facfe; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 1px;
+}
 
+/* File Input Styling */
 input[type="file"] { display: none; }
 
-.custom-file-upload, .btn-delete {
-    display: flex; align-items: center; justify-content: center;
-    padding: 12px; cursor: pointer; border-radius: 8px;
-    font-weight: bold; font-size: 14px; transition: 0.2s;
-    width: 100%; border: none; margin-bottom: 8px;
-    box-sizing: border-box;
-}
-
 .custom-file-upload {
+    border: 1px solid #4facfe;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 12px 15px; /* Más grande para click/tap */
+    cursor: pointer;
     background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-    color: white;
+    color: white; 
+    font-weight: bold;
+    border-radius: 8px; 
+    font-size: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    user-select: none;
 }
 
-.btn-delete {
-    background: #2a2a2a; color: #ff4444; border: 1px solid #444;
+.custom-file-upload:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4); 
 }
 
-.btn-delete:hover { background: #ff4444; color: white; }
+.custom-file-upload:active { 
+    transform: translateY(0); 
+}
 
-#status { margin-top: 10px; font-size: 12px; color: #aaa; }
-.info-text { font-size: 10px; color: #555; margin-top: 5px; }
+#status { 
+    margin-top: 15px; 
+    font-size: 13px; 
+    color: #aaa; 
+    border-top: 1px solid #333; 
+    padding-top: 10px; 
+}
 
+.info-text { 
+    margin-top: 5px; 
+    font-size: 11px; 
+    color: #666; 
+    line-height: 1.4; 
+}
+
+/* Loading Bar */
 #loader {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.8); display: none;
-    justify-content: center; align-items: center; flex-direction: column; z-index: 100;
+    position: fixed; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10,10,10,0.9); 
+    display: none;
+    justify-content: center; 
+    align-items: center;
+    flex-direction: column; 
+    z-index: 99;
 }
 
 .spinner {
-    border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #4facfe;
-    border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top: 3px solid #4facfe;
+    border-radius: 50%; 
+    width: 50px; height: 50px;
+    animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-@keyframes spin { 100% { transform: rotate(360deg); } }
 
-/* AJUSTE MÓVIL */
+.loader-text {
+    margin-top: 15px; 
+    color: #fff; 
+    font-size: 14px; 
+    letter-spacing: 1px;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- AJUSTES PARA MÓVILES --- */
 @media (max-width: 600px) {
     #ui-container {
-        top: auto; bottom: 30px; left: 50%;
-        transform: translateX(-50%); width: 90%;
+        /* Mover al fondo en móviles */
+        top: auto;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 85%;
+        min-width: unset;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .custom-file-upload {
+        padding: 15px; /* Botón más grande para dedos */
+        font-size: 16px;
     }
 }
